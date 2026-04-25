@@ -181,7 +181,7 @@ MAX_CONCURRENT_POSITIONS = 10    # Max open positions at once
 #  THROUGH $0.47 and drops to $0.46 (trade-through), OR when
 #  total volume at $0.47 exceeds queue position ahead of bot"
 # ─────────────────────────────────────────────────────────────
-PAPER_INITIAL_BALANCE = 3_000    # $3,000 starting virtual capital
+PAPER_INITIAL_BALANCE = 10_000   # $10,000 starting virtual capital
 
 # Pessimistic Fill Parameters
 PESSIMISTIC_FILL_ENABLED = False

@@ -14,7 +14,7 @@
 // ─── Configuration ──────────────────────────────────────────
 const API_BASE = "";  // Same origin
 const REFRESH_INTERVAL = 30_000;  // 30s
-const INITIAL_BALANCE = 3_000;
+const INITIAL_BALANCE = 10_000;
 
 // ─── State ──────────────────────────────────────────────────
 let equityChart = null;
@@ -456,6 +456,7 @@ function renderEquityChart(labels, balances, pnls) {
 }
 
 // ─── Live Logs ────────────────────────────────────────
+let lastLogIds = "";
 async function fetchLogs() {
     const levelParam = currentLogLevel ? `&level=${currentLogLevel}` : "";
     const data = await apiGet(`/api/logs?limit=80${levelParam}`);
@@ -463,13 +464,18 @@ async function fetchLogs() {
     const emptyState = document.getElementById("logs-empty");
     if (!body) return;
 
-    // Remove old log rows
-    body.querySelectorAll(".log-row").forEach(r => r.remove());
-
     if (!data || data.length === 0) {
         if (emptyState) emptyState.classList.remove("hidden");
         return;
     }
+
+    // Only re-render if data actually changed
+    const newIds = data.map(l => l.id).join(",");
+    if (newIds === lastLogIds) return;
+    lastLogIds = newIds;
+
+    // Remove old log rows
+    body.querySelectorAll(".log-row").forEach(r => r.remove());
     if (emptyState) emptyState.classList.add("hidden");
 
     // Insert newest first

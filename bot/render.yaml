@@ -1,0 +1,16 @@
+services:
+  # Dashboard (Web UI + REST API)
+  - type: web
+    name: 2m-strict-dashboard
+    runtime: python
+    rootDir: bot
+    buildCommand: pip install -r requirements.txt
+    startCommand: python api_server.py --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: PORT
+        value: 10000
+      - key: PYTHON_VERSION
+        value: "3.11"
+    plan: free

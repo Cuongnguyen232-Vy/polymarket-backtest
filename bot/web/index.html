@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2m Strict — Backtest Dashboard</title>
+    <meta name="description" content="Backtest results for 2m Strict Polymarket BTC strategy">
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">⚡</div>
+                <div>
+                    <h1>2m Strict Strategy</h1>
+                    <p class="subtitle" id="period">Loading...</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-run" id="btn-run" onclick="runBacktest()">▶ Run Backtest</button>
+                <span class="badge" id="run-status"></span>
+            </div>
+        </header>
+
+        <!-- Key Metrics Cards -->
+        <section class="metrics-grid" id="metrics-grid">
+            <div class="card metric-card">
+                <span class="metric-label">Overall Win Rate</span>
+                <span class="metric-value" id="win-rate">—</span>
+            </div>
+            <div class="card metric-card">
+                <span class="metric-label">LONG Win Rate</span>
+                <span class="metric-value" id="long-wr">—</span>
+            </div>
+            <div class="card metric-card">
+                <span class="metric-label">SHORT Win Rate</span>
+                <span class="metric-value" id="short-wr">—</span>
+            </div>
+            <div class="card metric-card">
+                <span class="metric-label">Total Signals</span>
+                <span class="metric-value" id="total-signals">—</span>
+            </div>
+            <div class="card metric-card">
+                <span class="metric-label">Setups / Week (24/7)</span>
+                <span class="metric-value" id="setups-24-7">—</span>
+            </div>
+            <div class="card metric-card">
+                <span class="metric-label">Setups / Week (NY)</span>
+                <span class="metric-value" id="setups-ny">—</span>
+            </div>
+        </section>
+
+        <!-- Fill Price Sensitivity -->
+        <section class="fill-section">
+            <h2>💰 Fill Price Sensitivity</h2>
+            <div class="fill-grid" id="fill-grid">
+                <div class="card fill-card" id="fill-80">
+                    <div class="fill-header">Fill @ 80¢</div>
+                    <div class="fill-body">
+                        <div class="fill-stat"><span>PnL</span><span id="pnl-80">—</span></div>
+                        <div class="fill-stat"><span>ROI</span><span id="roi-80">—</span></div>
+                        <div class="fill-stat"><span>Balance</span><span id="bal-80">—</span></div>
+                        <div class="fill-stat"><span>Max DD</span><span id="dd-80">—</span></div>
+                    </div>
+                </div>
+                <div class="card fill-card" id="fill-82">
+                    <div class="fill-header">Fill @ 82¢</div>
+                    <div class="fill-body">
+                        <div class="fill-stat"><span>PnL</span><span id="pnl-82">—</span></div>
+                        <div class="fill-stat"><span>ROI</span><span id="roi-82">—</span></div>
+                        <div class="fill-stat"><span>Balance</span><span id="bal-82">—</span></div>
+                        <div class="fill-stat"><span>Max DD</span><span id="dd-82">—</span></div>
+                    </div>
+                </div>
+                <div class="card fill-card" id="fill-85">
+                    <div class="fill-header">Fill @ 85¢</div>
+                    <div class="fill-body">
+                        <div class="fill-stat"><span>PnL</span><span id="pnl-85">—</span></div>
+                        <div class="fill-stat"><span>ROI</span><span id="roi-85">—</span></div>
+                        <div class="fill-stat"><span>Balance</span><span id="bal-85">—</span></div>
+                        <div class="fill-stat"><span>Max DD</span><span id="dd-85">—</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Equity Curve Chart -->
+        <section class="card chart-section">
+            <h2>📈 Equity Curve</h2>
+            <div class="chart-tabs">
+                <button class="tab active" onclick="setFillTab('80', this)">80¢</button>
+                <button class="tab" onclick="setFillTab('82', this)">82¢</button>
+                <button class="tab" onclick="setFillTab('85', this)">85¢</button>
+            </div>
+            <canvas id="equity-chart" height="300"></canvas>
+        </section>
+
+        <!-- Daily Win Rate Chart -->
+        <section class="card chart-section">
+            <h2>📊 Daily Win Rate</h2>
+            <canvas id="winrate-chart" height="250"></canvas>
+        </section>
+
+        <!-- Signal Breakdown -->
+        <section class="card chart-section">
+            <h2>🎯 Long vs Short Breakdown</h2>
+            <div class="breakdown-grid" id="breakdown-grid">
+                <div class="breakdown-item">
+                    <div class="breakdown-label">LONG Signals</div>
+                    <div class="breakdown-bar-container">
+                        <div class="breakdown-bar long-bar" id="long-bar"></div>
+                    </div>
+                    <span class="breakdown-count" id="long-count">—</span>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-label">SHORT Signals</div>
+                    <div class="breakdown-bar-container">
+                        <div class="breakdown-bar short-bar" id="short-bar"></div>
+                    </div>
+                    <span class="breakdown-count" id="short-count">—</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Signals Table -->
+        <section class="card table-section">
+            <div class="table-header">
+                <h2>📋 Signals</h2>
+                <div class="table-filters">
+                    <button class="tab active" onclick="filterSignals('all', this)">All</button>
+                    <button class="tab" onclick="filterSignals('LONG', this)">LONG</button>
+                    <button class="tab" onclick="filterSignals('SHORT', this)">SHORT</button>
+                    <button class="tab" onclick="filterSignals('wins', this)">Wins ✅</button>
+                    <button class="tab" onclick="filterSignals('losses', this)">Losses ❌</button>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="signals-table">
+                    <thead>
+                        <tr>
+                            <th>Time (UTC)</th>
+                            <th>Type</th>
+                            <th>BTC Price</th>
+                            <th>Vol Ratio</th>
+                            <th>5m Dir</th>
+                            <th>Result</th>
+                            <th>PnL (80¢)</th>
+                            <th>NY</th>
+                        </tr>
+                    </thead>
+                    <tbody id="signals-body"></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination"></div>
+        </section>
+
+        <footer class="footer">
+            <p>2m Strict Backtest Dashboard — Polymarket BTC Up/Down</p>
+        </footer>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>

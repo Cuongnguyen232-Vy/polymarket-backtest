@@ -27,7 +27,7 @@ def fetch_klines(symbol: str, interval: str, start_ts: int, end_ts: int,
     Fetch klines from Binance public API with pagination.
     Returns list of candle dicts: {t, o, h, l, c, v, ct}
     """
-    url = f"{BINANCE_BASE_URL}/api/v3/klines"
+    url = f"{BINANCE_BASE_URL}/klines"
     all_candles = []
     current_start = start_ts
 

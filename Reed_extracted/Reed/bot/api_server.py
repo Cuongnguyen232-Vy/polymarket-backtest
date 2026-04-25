@@ -463,6 +463,109 @@ def api_health():
     return _jsonify(report)
 
 
+# ─── Live Polymarket Data Check ──────────────────────────────
+
+@app.route("/api/polymarket-live")
+def api_polymarket_live():
+    """Kéo dữ liệu THẬT từ Polymarket để kiểm tra API."""
+    import dns_bypass
+    import requests as req
+
+    results = {"status": "error", "polymarket": [], "binance": {}}
+
+    # 1. Polymarket Gamma API
+    try:
+        r = req.get("https://gamma-api.polymarket.com/events",
+                     params={"closed": "false", "limit": 10, "tag": "crypto"},
+                     timeout=15)
+        events = r.json()
+        markets = []
+        for event in events:
+            for m in event.get("markets", []):
+                prices = m.get("outcomePrices", "")
+                try:
+                    price_list = json.loads(prices) if isinstance(prices, str) else prices
+                except Exception:
+                    price_list = prices
+                markets.append({
+                    "question": m.get("question", ""),
+                    "yes_price": price_list[0] if isinstance(price_list, list) and len(price_list) > 0 else "?",
+                    "no_price": price_list[1] if isinstance(price_list, list) and len(price_list) > 1 else "?",
+                    "volume": m.get("volume", 0),
+                    "end_date": m.get("endDate", ""),
+                })
+        results["polymarket"] = markets
+        results["polymarket_count"] = len(markets)
+        results["status"] = "ok"
+    except Exception as e:
+        results["polymarket_error"] = str(e)
+
+    # 2. Binance BTC price
+    try:
+        r2 = req.get("https://api.binance.com/api/v3/ticker/price",
+                      params={"symbol": "BTCUSDT"}, timeout=10)
+        results["binance"] = r2.json()
+    except Exception as e:
+        results["binance_error"] = str(e)
+
+    results["checked_at"] = datetime.now(timezone.utc).isoformat()
+    return _jsonify(results)
+
+
+@app.route("/check")
+def check_page():
+    """Trang kiểm tra API trực quan."""
+    html = """<!DOCTYPE html>
+<html><head>
+<title>PolyM - API Check</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;padding:40px}
+h1{color:#2A59FA;margin-bottom:10px}
+h2{color:#58a6ff;margin:30px 0 15px}
+.ok{background:#238636;color:white;padding:4px 12px;border-radius:12px;font-weight:bold}
+.err{background:#da3633;color:white;padding:4px 12px;border-radius:12px;font-weight:bold}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;margin:10px 0}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th{text-align:left;color:#8b949e;padding:8px;border-bottom:1px solid #30363d}
+td{padding:8px;border-bottom:1px solid #21262d}
+.price{color:#3fb950;font-weight:bold;font-size:22px}
+.yes{color:#3fb950} .no{color:#f85149}
+a{color:#58a6ff}
+</style>
+</head><body>
+<h1>PolyM - Kiem Tra Ket Noi API</h1>
+<p style="color:#8b949e">Trang nay keo du lieu THAT tu Polymarket + Binance.</p>
+<div id="c"><p style="color:#8b949e">Dang keo du lieu...</p></div>
+<script>
+fetch('/api/polymarket-live').then(r=>r.json()).then(d=>{
+let h='';
+h+='<h2>Binance - Gia BTC</h2><div class="card">';
+if(d.binance&&d.binance.price){
+h+='<p>BTCUSDT: <span class="price">$'+parseFloat(d.binance.price).toLocaleString()+'</span></p>';
+}else{h+='<p class="err">Loi ket noi Binance</p>';}
+h+='</div>';
+h+='<h2>Polymarket - Thi Truong Crypto</h2><div class="card">';
+if(d.polymarket&&d.polymarket.length>0){
+h+='<p>Tim thay <strong>'+d.polymarket.length+'</strong> thi truong <span class="ok">API OK</span></p>';
+h+='<table><tr><th>Thi truong</th><th>YES</th><th>NO</th><th>Het han</th></tr>';
+d.polymarket.forEach(m=>{
+let y=parseFloat(m.yes_price),n=parseFloat(m.no_price);
+let ys=isNaN(y)?m.yes_price:(y*100).toFixed(1)+'c';
+let ns=isNaN(n)?m.no_price:(n*100).toFixed(1)+'c';
+let e=m.end_date?m.end_date.split('T')[0]:'-';
+h+='<tr><td>'+m.question.substring(0,65)+'</td><td class="yes">'+ys+'</td><td class="no">'+ns+'</td><td>'+e+'</td></tr>';
+});
+h+='</table>';
+}else{h+='<p class="err">Khong keo duoc</p>';}
+h+='</div>';
+h+='<p style="margin-top:20px;color:#8b949e">Checked: '+d.checked_at+'</p>';
+h+='<p style="margin-top:10px"><a href="/">Dashboard</a></p>';
+document.getElementById('c').innerHTML=h;
+}).catch(e=>{document.getElementById('c').innerHTML='Loi: '+e;});
+</script>
+</body></html>"""
+    return html
 
 
 if __name__ == "__main__":

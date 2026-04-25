@@ -19,6 +19,8 @@ Usage:
 ═══════════════════════════════════════════════════════════════
 """
 
+import dns_bypass  # Bypass DNS nhà mạng VN
+
 import sys
 import json
 import asyncio

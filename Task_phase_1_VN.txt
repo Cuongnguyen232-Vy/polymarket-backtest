@@ -1,0 +1,65 @@
+════════════════════════════════════════════════════════════════
+  TASK PHASE 1 — BẢN DỊCH TIẾNG VIỆT
+  Chiến lược: 2m Strict
+════════════════════════════════════════════════════════════════
+
+Backtest chiến lược này bằng dữ liệu chất lượng cao từ Polygon.io hoặc Binance.
+
+────────────────────────────────────────────────────────────────
+TÊN CHIẾN LƯỢC:
+  2m Strict — Nến 2 phút đầu tiên của mỗi cây nến 5 phút + Bộ lọc EMA kép
+
+THỊ TRƯỜNG MỤC TIÊU:
+  Thị trường nhị phân BTC Tăng/Giảm kỳ hạn 5 phút trên Polymarket
+
+KHUNG THỜI GIAN BIỂU ĐỒ:
+  Bắt buộc chạy trên biểu đồ nến 2 phút
+
+────────────────────────────────────────────────────────────────
+5 QUY TẮC KÍCH HOẠT TÍN HIỆU (TẤT CẢ phải đúng cùng lúc)
+────────────────────────────────────────────────────────────────
+
+1️⃣  QUY TẮC THỜI GIAN (Quan trọng nhất)
+    • Cây nến 2m phải là cây nến 2m ĐẦU TIÊN của một cây nến 5m mới.
+    • Nó phải đóng cửa trong 2 phút đầu tiên của cửa sổ 5m
+      (tức là nến đóng tại khoảng :02, :07, :12, :17, :22, :27, v.v.)
+
+2️⃣  QUY TẮC KHỐI LƯỢNG (Volume Vector)
+    • Khối lượng nến 2m hiện tại ≥ 200% trung bình khối lượng
+      của 10 cây nến trước đó.
+
+3️⃣  BỘ LỌC THÂN NẾN ĐẦY ĐỦ (Full-Bodied Filter)
+    • Thân nến phải ≥ 0.08% giá đóng cửa (loại bỏ nến doji/nến bấc dài).
+
+4️⃣  HƯỚNG TÍN HIỆU
+    • Nến xanh (đóng cửa > mở cửa) = Tín hiệu MUA (LONG / UP)
+    • Nến đỏ  (đóng cửa < mở cửa) = Tín hiệu BÁN (SHORT / DOWN)
+
+5️⃣  BỘ LỌC XU HƯỚNG EMA (Bắt buộc)
+    • Chỉ MUA khi giá đang TRÊN cả hai đường:
+        - EMA 20 trên khung 30 phút
+        - EMA 50 trên khung 1 giờ
+    • Chỉ BÁN khi giá đang DƯỚI cả hai đường EMA trên.
+
+────────────────────────────────────────────────────────────────
+Ý NGHĨA TÍN HIỆU:
+────────────────────────────────────────────────────────────────
+  Hướng đi của cây nến 2m đầu tiên này DỰ ĐOÁN hướng đóng cửa
+  của toàn bộ cây nến 5 phút.
+
+  Ví dụ: Nến 2m đầu tiên xanh mạnh + đủ 5 điều kiện
+         → Dự đoán nến 5m sẽ đóng cửa XANH (BTC tăng)
+         → Mua token YES trên Polymarket
+
+────────────────────────────────────────────────────────────────
+YÊU CẦU BACKTEST:
+────────────────────────────────────────────────────────────────
+  Vui lòng backtest chiến lược này trong 12 tháng gần nhất
+  bằng dữ liệu chất lượng cao (ưu tiên Polygon.io).
+
+  Báo cáo các chỉ số sau:
+  ✓ Tỷ lệ thắng tổng thể (Overall Win Rate)
+  ✓ Tỷ lệ thắng riêng cho tín hiệu LONG vs SHORT
+  ✓ Số lượng tín hiệu trung bình mỗi tuần (24/7 và chỉ phiên NY)
+  ✓ Mức sụt giảm tối đa (Max Drawdown)
+  ✓ Độ nhạy với giá khớp lệnh (test ở mức 80¢, 82¢, 85¢)

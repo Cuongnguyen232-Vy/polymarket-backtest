@@ -1,10 +1,10 @@
 """
-config.py — K9 Strategy Parameters
+config.py — PolyM Strategy Parameters
 ═══════════════════════════════════════════════════════════════
 Every single parameter is traced back to a specific section
-in the K9_Strategy_Report_EN.md reverse-engineering report.
+in the PolyM_Strategy_Report_EN.md reverse-engineering report.
 
-Data source: 104,388 positions from K9 wallet
+Data source: 104,388 positions from PolyM wallet
 Period: Dec 18, 2025 → Mar 30, 2026 (102 trading days)
 On-chain: 12.19M ERC-1155 transfers + 8.1M USDC settlements
 ═══════════════════════════════════════════════════════════════

@@ -2,11 +2,11 @@
 market_scanner.py — Module 1: Polymarket Market Scanner
 ═══════════════════════════════════════════════════════════════
 Scans Polymarket Gamma API to find eligible markets matching
-the K9 strategy parameters from the reverse-engineering report.
+the PolyM strategy parameters from the reverse-engineering report.
 
 Report References:
   §2.1 — Market Demographics: ONLY "Crypto Up or Down" 5/15-min
-  §2.1 — Price Range: $0.30 - $0.70 (70.7% of K9 trades)
+  §2.1 — Price Range: $0.30 - $0.70 (70.7% of PolyM trades)
   §5   — Volume Filter: > $50,000
   §4.3 — Depth Filter: Avoid Illiquidity Traps
   
@@ -32,7 +32,7 @@ from config import (
     SCAN_INTERVAL_SEC, MAX_CONCURRENT_POSITIONS,
 )
 
-logger = logging.getLogger("k9.scanner")
+logger = logging.getLogger("PolyM.scanner")
 
 
 # ─── Data Models ─────────────────────────────────────────────
@@ -64,9 +64,9 @@ class Market:
 
 class MarketScanner:
     """
-    Scans Polymarket for markets matching K9 strategy criteria.
+    Scans Polymarket for markets matching PolyM strategy criteria.
     
-    K9 Filter Pipeline (Report §2.1 + §5):
+    PolyM Filter Pipeline (Report §2.1 + §5):
     1. Keyword filter  → "Crypto Up or Down" only
     2. Asset filter    → BTC, ETH, SOL, XRP
     3. Timeframe       → 15-min (90.3%) or 5-min
@@ -98,7 +98,7 @@ class MarketScanner:
         """
         Full scan pipeline:
         1. Fetch active "Up or Down" markets from Gamma /markets API
-        2. Filter by K9 criteria (asset, price, accepting orders)
+        2. Filter by PolyM criteria (asset, price, accepting orders)
         3. Fetch orderbooks for eligible markets
         4. Save to database
         5. Return list of eligible Market objects
@@ -121,7 +121,7 @@ class MarketScanner:
                 )
                 return []
 
-            # Step 2: Filter through K9 pipeline
+            # Step 2: Filter through PolyM pipeline
             candidates = self._filter_raw_markets(raw_markets)
             logger.info(
                 f"Scan #{self._scan_count}: {len(raw_markets)} raw → "
@@ -366,7 +366,7 @@ class MarketScanner:
 
     def _filter_raw_markets(self, raw_markets: list) -> list[Market]:
         """
-        Apply K9 filter pipeline to raw /markets API results.
+        Apply PolyM filter pipeline to raw /markets API results.
         Returns list of Market candidates.
         
         Pipeline (Report §2.1 + §5):
@@ -738,7 +738,7 @@ class MarketScanner:
 
             return diff
 
-        # Default to 15-min (90.3% of K9 trades)
+        # Default to 15-min (90.3% of PolyM trades)
         return PREFERRED_TIMEFRAME_MINUTES
 
 
@@ -756,7 +756,7 @@ async def _test():
     db = Database()
     scanner = MarketScanner(db)
 
-    print("🔍 Scanning Polymarket for K9-eligible markets...\n")
+    print("🔍 Scanning Polymarket for PolyM-eligible markets...\n")
 
     markets = await scanner.scan_markets()
 

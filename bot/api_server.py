@@ -1,5 +1,5 @@
 """
-api_server.py — REST API for K9 Trading Dashboard
+api_server.py — REST API for PolyM Trading Dashboard
 ═══════════════════════════════════════════════════
 Flask server that exposes bot data to the web dashboard.
 Reuses existing db.py Database class.
@@ -10,7 +10,7 @@ Endpoints:
   GET /api/trades      → Closed trades (paginated)
   GET /api/daily       → Daily summary data for charts
   GET /api/equity      → Equity curve data points
-  GET /api/benchmark   → K9 benchmark comparison
+  GET /api/benchmark   → PolyM benchmark comparison
   GET /api/status      → Bot running status
 
 Usage:
@@ -310,7 +310,7 @@ def api_equity():
 
 @app.route("/api/benchmark")
 def api_benchmark():
-    """K9 benchmark comparison."""
+    """PolyM benchmark comparison."""
     trades = db.get_all_trades()
     closed_trades = [t for t in trades if t.get("status") != "OPEN"]
     
@@ -355,7 +355,7 @@ def api_benchmark():
             "total_trades": len(trades),
             "total_days": total_days,
         },
-        "k9_benchmark": {
+        "PolyM_benchmark": {
             "win_rate": 51.6,
             "rr_ratio": 1.20,
             "profit_days_pct": 91.8,
@@ -432,7 +432,7 @@ def api_health():
     """Full health report for remote diagnosis."""
     report = db.get_health_report()
 
-    # Also include trade performance vs K9 benchmark
+    # Also include trade performance vs PolyM benchmark
     stats = db.get_stats()
     daily = db.get_daily_summaries()
 
@@ -444,9 +444,9 @@ def api_health():
         "total_pnl": float(stats.get("total_pnl", 0)),
         "total_trades": stats.get("total_trades", 0),
         "win_rate_bot": 0,
-        "win_rate_k9": 51.6,
+        "win_rate_PolyM": 51.6,
         "profit_days_bot": round(win_days / total_days * 100, 1),
-        "profit_days_k9": 91.8,
+        "profit_days_PolyM": 91.8,
     }
 
     # Calculate win rate if trades exist
@@ -473,6 +473,6 @@ if __name__ == "__main__":
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
 
-    print(f"🌐 K9 Dashboard API starting on http://{args.host}:{args.port}")
+    print(f"🌐 PolyM Dashboard API starting on http://{args.host}:{args.port}")
     print(f"   Open http://localhost:{args.port} in your browser")
     app.run(host=args.host, port=args.port, debug=args.debug)

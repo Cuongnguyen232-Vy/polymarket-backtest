@@ -31,7 +31,7 @@ from config import PAPER_INITIAL_BALANCE
 
 
 class Dashboard:
-    """Report generator for K9 Paper Trading Bot."""
+    """Report generator for PolyM Paper Trading Bot."""
 
     def __init__(self, db: Database = None):
         self.db = db or Database()
@@ -69,7 +69,7 @@ class Dashboard:
 
         report = []
         report.append("━" * 50)
-        report.append("  K9 BOT — DAILY PERFORMANCE REPORT")
+        report.append("  PolyM BOT — DAILY PERFORMANCE REPORT")
         report.append(f"  Date: {target_date}")
         report.append(f"  Generated: {datetime.now(timezone.utc).strftime('%H:%M UTC')}")
         report.append("━" * 50)
@@ -139,7 +139,7 @@ class Dashboard:
 
         report = []
         report.append("═" * 60)
-        report.append("  K9 PAPER TRADING BOT — FULL PERFORMANCE REPORT")
+        report.append("  PolyM PAPER TRADING BOT — FULL PERFORMANCE REPORT")
         report.append(f"  Period: {summaries[0]['date']} → {summaries[-1]['date']}")
         report.append(f"  Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
         report.append("═" * 60)
@@ -228,11 +228,11 @@ class Dashboard:
         report.append("  " + "─" * 72)
         report.append("")
 
-        # Consistency check vs K9 targets
-        report.append("🎯 vs K9 BENCHMARK")
-        report.append(f"  K9 Win Rate:  51.6%  | Bot: {agg_wr:.1f}%")
-        report.append(f"  K9 R:R:       1.20   | Bot: {avg_rr:.2f}")
-        report.append(f"  K9 Profit%:   91.8%  | Bot: "
+        # Consistency check vs PolyM targets
+        report.append("🎯 vs PolyM BENCHMARK")
+        report.append(f"  PolyM Win Rate:  51.6%  | Bot: {agg_wr:.1f}%")
+        report.append(f"  PolyM R:R:       1.20   | Bot: {avg_rr:.2f}")
+        report.append(f"  PolyM Profit%:   91.8%  | Bot: "
                       f"{profit_days/len(summaries)*100:.1f}%")
         report.append("")
         report.append("═" * 60)
@@ -250,7 +250,7 @@ class Dashboard:
 
         if filepath is None:
             today = datetime.now(timezone.utc).strftime("%Y%m%d")
-            filepath = os.path.join(self.output_dir, f"k9_trades_{today}.csv")
+            filepath = os.path.join(self.output_dir, f"PolyM_trades_{today}.csv")
 
         # Define clean column order for export
         columns = [
@@ -289,7 +289,7 @@ class Dashboard:
 
         if filepath is None:
             today = datetime.now(timezone.utc).strftime("%Y%m%d")
-            filepath = os.path.join(self.output_dir, f"k9_daily_{today}.csv")
+            filepath = os.path.join(self.output_dir, f"PolyM_daily_{today}.csv")
 
         columns = [
             "date", "total_trades", "winners", "losers", "breakeven",
@@ -317,7 +317,7 @@ class Dashboard:
         pnl = float(stats['total_pnl'])
         roi = (balance - PAPER_INITIAL_BALANCE) / PAPER_INITIAL_BALANCE * 100
 
-        print(f"\n💼 K9 Bot Status")
+        print(f"\n💼 PolyM Bot Status")
         print(f"   Balance:    ${balance:,.2f}")
         print(f"   Total PnL:  ${pnl:+,.2f} ({roi:+.1f}%)")
         print(f"   Trades:     {stats['total_trades']} "

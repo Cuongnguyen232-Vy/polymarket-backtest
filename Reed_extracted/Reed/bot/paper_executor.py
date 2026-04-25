@@ -35,7 +35,7 @@ from config import (
 from strategy_engine import Signal, StrategyEngine
 from pathlib import Path
 
-logger = logging.getLogger("k9.executor")
+logger = logging.getLogger("PolyM.executor")
 
 
 class PaperExecutor:
@@ -56,11 +56,11 @@ class PaperExecutor:
         self._ws_connected = False
         self._pending_signals: list[Signal] = []
 
-        # Pre-determined simulation outcomes (K9 statistical matching)
+        # Pre-determined simulation outcomes (PolyM statistical matching)
         # token_id → {target_price, hold_ticks, ticks_elapsed, is_win}
         self._sim_outcomes: dict[str, dict] = {}
 
-        # ─── K9 Replay Schedule (97-day historical data) ───
+        # ─── PolyM Replay Schedule (97-day historical data) ───
         self._replay_schedule = self._load_replay_schedule()
         self._current_trade_date = datetime.now(timezone.utc).date()  # track current day
 
@@ -117,7 +117,7 @@ class PaperExecutor:
             days_elapsed = (datetime.now(timezone.utc).date() - self._replay_start_date).days
             day_index = days_elapsed % len(self._replay_schedule)
             logger.info(
-                f"📅 K9 Replay: Day {day_index} "
+                f"📅 PolyM Replay: Day {day_index} "
                 f"({self._replay_schedule[day_index]['original_date']})"
             )
 
@@ -356,7 +356,7 @@ class PaperExecutor:
         
         PAPER TRADING ENHANCEMENT:
         When no live WebSocket price is available (e.g., dormant markets),
-        simulates price movement using K9's statistical profile:
+        simulates price movement using PolyM's statistical profile:
         - Win rate: ~51.6%
         - TP spread: +$0.050
         - SL spread: -$0.040
@@ -401,18 +401,18 @@ class PaperExecutor:
 
     def _load_replay_schedule(self) -> list:
         """
-        Load K9's 97-day historical trading schedule.
+        Load PolyM's 97-day historical trading schedule.
         Contains daily win rates, trade counts, and daily_return_pct
-        from the original K9 wallet's 104,388 on-chain positions.
+        from the original PolyM wallet's 104,388 on-chain positions.
         """
-        schedule_path = Path(__file__).parent / "k9_replay_schedule.json"
+        schedule_path = Path(__file__).parent / "PolyM_replay_schedule.json"
         try:
             with open(schedule_path) as f:
                 schedule = json.load(f)
-            logger.info(f"Loaded K9 replay schedule: {len(schedule)} days")
+            logger.info(f"Loaded PolyM replay schedule: {len(schedule)} days")
             return schedule
         except FileNotFoundError:
-            logger.warning("k9_replay_schedule.json not found, using random sim")
+            logger.warning("PolyM_replay_schedule.json not found, using random sim")
             return []
         except Exception as e:
             logger.error(f"Failed to load replay schedule: {e}")
@@ -420,8 +420,8 @@ class PaperExecutor:
 
     def _get_today_schedule(self) -> dict:
         """
-        Get today's K9 replay schedule.
-        Maps current date to a K9 historical day (cycles through 97 days).
+        Get today's PolyM replay schedule.
+        Maps current date to a PolyM historical day (cycles through 97 days).
         """
         if not self._replay_schedule:
             return None
@@ -436,32 +436,32 @@ class PaperExecutor:
         """
         Calculate how many trades to execute today.
 
-        K9 ORIGINAL: Uses the SAME number of trades as K9's original day.
-        K9 wallet stats (104,388 positions over 97 days):
+        PolyM ORIGINAL: Uses the SAME number of trades as PolyM's original day.
+        PolyM wallet stats (104,388 positions over 97 days):
           - Average: 1,076 trades/day
           - Median:  780 trades/day
           - Peak:    2,457 trades/day (Mar 22)
           - 75% of days had 500+ trades
 
-        No artificial cap and no artificial minimum — use K9's actual count 
-        to perfectly match the real K9 activity level, including quiet days.
+        No artificial cap and no artificial minimum — use PolyM's actual count 
+        to perfectly match the real PolyM activity level, including quiet days.
         """
         schedule = self._get_today_schedule()
         if not schedule:
             return 100  # fallback default if schedule fails to load
 
-        # Use K9's original trade count directly — NO CAP, NO MINIMUM
-        k9_original_trades = schedule.get('total_trades', 100)
+        # Use PolyM's original trade count directly — NO CAP, NO MINIMUM
+        PolyM_original_trades = schedule.get('total_trades', 100)
 
         # Ensure at least 1 trade to avoid division by zero in pacing
-        return max(1, k9_original_trades)
+        return max(1, PolyM_original_trades)
 
     def has_daily_capacity(self) -> bool:
         """
         Check if bot should continue entering trades.
         
         UNCAPPED MODE: No daily trade limit. The bot trades as many
-        markets as available, matching the original K9 HFT behavior
+        markets as available, matching the original PolyM HFT behavior
         (up to 2,457 trades/day on peak days).
         
         Only gate: minimum 10s pacing between trades to avoid API
@@ -498,9 +498,9 @@ class PaperExecutor:
     def _register_sim_outcome(self, token_id: str, entry_price: float,
                               tp_price: float, sl_price: float):
         """
-        Pre-determine trade outcome using K9's statistical win rate.
+        Pre-determine trade outcome using PolyM's statistical win rate.
         
-        K9 wallet overall stats:
+        PolyM wallet overall stats:
         - 51.6% win rate across 104,388 positions
         - TP spread: +$0.050, SL spread: -$0.040
         - R:R ratio: ~1.28
@@ -522,7 +522,7 @@ class PaperExecutor:
 
         target = tp_price if is_win else sl_price
 
-        # Hold duration (K9 report: median 18 min, 80% within 5-30 min)
+        # Hold duration (PolyM report: median 18 min, 80% within 5-30 min)
         hold_minutes = max(3, min(30, random.gauss(18, 6)))
         hold_ticks = int(hold_minutes * 60)
 
@@ -548,9 +548,9 @@ class PaperExecutor:
         The price drifts naturally toward the target (TP or SL)
         with realistic noise, arriving approximately at the
         pre-determined hold time. This creates organic-looking
-        price charts while guaranteeing exact K9 statistics.
+        price charts while guaranteeing exact PolyM statistics.
         
-        K9 Report Match:
+        PolyM Report Match:
         - 51.6% hit TP (pre-determined at entry)
         - 48.4% hit SL (pre-determined at entry)
         - Natural price movement with realistic volatility
@@ -778,7 +778,7 @@ class PaperExecutor:
 
         report = f"""
 ═══════════════════════════════════════════════════════
-  K9 PAPER TRADING — DAILY REPORT
+  PolyM PAPER TRADING — DAILY REPORT
   Date: {target_date}
   Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}
 ═══════════════════════════════════════════════════════
@@ -827,7 +827,7 @@ class PaperExecutor:
 
         if filepath is None:
             today = datetime.now(timezone.utc).strftime("%Y%m%d")
-            filepath = f"k9_trades_{today}.csv"
+            filepath = f"PolyM_trades_{today}.csv"
 
         trades = self.db.get_all_trades()
         if not trades:
@@ -923,7 +923,7 @@ if __name__ == "__main__":
 
             # Export CSV
             csv_file = executor.export_trades_csv(
-                "/tmp/k9_test_trades.csv"
+                "/tmp/PolyM_test_trades.csv"
             )
             if csv_file:
                 print(f"✅ CSV exported to {csv_file}")

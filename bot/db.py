@@ -255,7 +255,7 @@ class Database:
             """, market)
 
     def get_eligible_markets(self) -> list:
-        """Get all markets that passed K9 filters."""
+        """Get all markets that passed PolyM filters."""
         with self.get_cursor() as cur:
             cur.execute("""
                 SELECT * FROM markets

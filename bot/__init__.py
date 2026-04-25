@@ -1,1 +1,1 @@
-# K9 Polymarket Paper Trading Bot
+# PolyM Polymarket Paper Trading Bot

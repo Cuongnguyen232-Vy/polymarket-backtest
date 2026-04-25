@@ -1,7 +1,7 @@
 """
 bot_worker.py — Render.com Worker Entry Point
 ═══════════════════════════════════════════════
-Runs the K9 trading bot in a background thread while serving
+Runs the PolyM trading bot in a background thread while serving
 a minimal HTTP health endpoint on the Render PORT.
 
 This keeps the Render free-tier service alive (prevents spin-down)
@@ -94,17 +94,17 @@ class HealthHandler(BaseHTTPRequestHandler):
 # ─── Bot Thread ──────────────────────────────────────────────
 
 def run_bot_thread():
-    """Run the K9 bot in its own thread with its own event loop."""
+    """Run the PolyM bot in its own thread with its own event loop."""
     global bot_instance, bot_thread_alive
 
-    from bot_main import K9Bot
+    from bot_main import PolyMBot
     import signal as sig
 
     bot_thread_alive = True
     logger.info("🤖 Bot thread starting...")
 
     try:
-        bot_instance = K9Bot(reset=False)
+        bot_instance = PolyMBot(reset=False)
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 

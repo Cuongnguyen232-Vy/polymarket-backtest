@@ -1,7 +1,7 @@
 """
-strategy_engine.py — Module 2: K9 Strategy Signal Generator
+strategy_engine.py — Module 2: PolyM Strategy Signal Generator
 ═══════════════════════════════════════════════════════════════
-Implements the K9 reverse-engineered HFT Market Maker logic.
+Implements the PolyM reverse-engineered HFT Market Maker logic.
 Generates BUY/SELL signals based on report parameters.
 
 Report References:
@@ -37,7 +37,7 @@ from config import (
 )
 from market_scanner import Market
 
-logger = logging.getLogger("k9.strategy")
+logger = logging.getLogger("PolyM.strategy")
 
 
 # ─── Data Models ─────────────────────────────────────────────
@@ -61,7 +61,7 @@ class Signal:
 
 class StrategyEngine:
     """
-    K9 Strategy Decision Engine.
+    PolyM Strategy Decision Engine.
     
     Decision tree (1:1 mapping from report):
     1. Is price in zone $0.30-$0.70?           → Report §2.1
@@ -79,7 +79,7 @@ class StrategyEngine:
     def evaluate(self, market: Market, orderbook_yes: dict,
                  orderbook_no: dict, balance: float) -> Optional[Signal]:
         """
-        Evaluate a market and generate a signal if K9 criteria are met.
+        Evaluate a market and generate a signal if PolyM criteria are met.
         
         Args:
             market: Market object from scanner
@@ -158,7 +158,7 @@ class StrategyEngine:
         force_exit_at = now_utc + timedelta(minutes=MAX_HOLD_MINUTES)
 
         reason = (
-            f"K9 signal: {market.asset} {side} @ ${entry_price:.3f} | "
+            f"PolyM signal: {market.asset} {side} @ ${entry_price:.3f} | "
             f"Zone ${ENTRY_PRICE_MIN}-${ENTRY_PRICE_MAX} ✓ | "
             f"Depth ${depth:,.0f} ✓ | "
             f"TP ${tp_price:.3f} SL ${sl_price:.3f} R:R "
@@ -186,7 +186,7 @@ class StrategyEngine:
         self, market: Market, ob_yes: dict, ob_no: dict
     ) -> tuple[Optional[str], float, float]:
         """
-        Report §4.1: "K9 is a Pure Market Maker"
+        Report §4.1: "PolyM is a Pure Market Maker"
         Report VN §4.1: "Treo mua $0.47, Treo bán $0.52"
         
         Entry Price Strategy (3-tier fallback):
@@ -300,7 +300,7 @@ class StrategyEngine:
 
         size = SIZE_MEDIAN * depth_ratio
 
-        # Clamp to K9 range (Report §2.3)
+        # Clamp to PolyM range (Report §2.3)
         size = max(SIZE_MIN, min(size, SIZE_MAX))
 
         # Risk limit: never exceed 5% of balance
@@ -437,7 +437,7 @@ if __name__ == "__main__":
     assert SIZE_MIN <= size_low <= SIZE_MAX
     assert SIZE_MIN <= size_med <= SIZE_MAX
     assert SIZE_MIN <= size_high <= SIZE_MAX
-    print("✅ Dynamic sizing within K9 range [$100-$2,000]\n")
+    print("✅ Dynamic sizing within PolyM range [$100-$2,000]\n")
 
     # Test sizing respects balance cap
     size_broke = StrategyEngine._calculate_size(50_000, 1_000)

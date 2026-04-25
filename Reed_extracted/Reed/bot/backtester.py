@@ -1,10 +1,10 @@
 """
-backtester.py — K9 Strategy Backtester & Parameter Calibrator
+backtester.py — PolyM Strategy Backtester & Parameter Calibrator
 ═══════════════════════════════════════════════════════════════
-Runs the bot's strategy logic against 8,670 real K9 positions
+Runs the bot's strategy logic against 8,670 real PolyM positions
 to verify our parameters produce results matching the original.
 
-Goal: Tune TP/SL/Sizing until backtest metrics match K9 actuals:
+Goal: Tune TP/SL/Sizing until backtest metrics match PolyM actuals:
   - Win Rate:    ~51.6% (excl breakeven)
   - R:R Ratio:   ~1.20 (mean)
   - Avg Win PnL: ~$239.51
@@ -21,8 +21,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 
-# ─── K9 Actual Benchmarks (from 104K position analysis) ──────
-K9_ACTUAL = {
+# ─── PolyM Actual Benchmarks (from 104K position analysis) ──────
+PolyM_ACTUAL = {
     "win_rate": 51.6,          # % (excl breakeven)
     "rr_ratio_mean": 1.20,
     "rr_ratio_median": 1.14,
@@ -44,7 +44,7 @@ K9_ACTUAL = {
 
 @dataclass
 class StrategyParams:
-    """Parameters to tune until backtest matches K9."""
+    """Parameters to tune until backtest matches PolyM."""
     # TP/SL are not fixed points but ZONES with variance
     tp_spread_mean: float = 0.050    # TUNED: from 0.058 (EV-optimized)
     tp_spread_std: float = 0.010     # TUNED: from 0.025 (less noise)
@@ -76,13 +76,13 @@ def run_backtest(positions: list, params: StrategyParams,
     """
     Simulate bot strategy on historical positions.
     
-    KEY INSIGHT: Instead of generating random PnL, we use K9's
+    KEY INSIGHT: Instead of generating random PnL, we use PolyM's
     REAL trade outcomes and apply our strategy rules to see if
     we would have taken the same trade. We add noise to simulate
     the fact that our bot won't get identical fills.
     
     For each position:
-    1. Would K9 rules allow this entry? (price zone, size)
+    1. Would PolyM rules allow this entry? (price zone, size)
     2. Use REAL PnL direction (win/loss) from data
     3. Apply noise to spread to simulate fill variance
     4. Calculate simulated PnL
@@ -102,12 +102,12 @@ def run_backtest(positions: list, params: StrategyParams,
         if real_size <= 10:
             continue
 
-        # Skip if entry outside K9 zone
+        # Skip if entry outside PolyM zone
         if entry_price <= 0.05 or entry_price >= 0.95:
             continue
 
         # ── Use REAL outcome direction, add noise ──
-        # K9 data tells us if this trade won or lost.
+        # PolyM data tells us if this trade won or lost.
         # Our bot would face similar market conditions,
         # but with slightly different fill prices.
 
@@ -222,12 +222,12 @@ def run_backtest(positions: list, params: StrategyParams,
     return metrics
 
 
-def compare_metrics(sim: dict, actual: dict = K9_ACTUAL) -> str:
-    """Compare simulated metrics vs K9 actual and show delta."""
+def compare_metrics(sim: dict, actual: dict = PolyM_ACTUAL) -> str:
+    """Compare simulated metrics vs PolyM actual and show delta."""
     lines = []
     lines.append("")
     lines.append("=" * 72)
-    lines.append("  BACKTEST vs K9 ACTUAL — COMPARISON")
+    lines.append("  BACKTEST vs PolyM ACTUAL — COMPARISON")
     lines.append("=" * 72)
 
     comparisons = [
@@ -244,7 +244,7 @@ def compare_metrics(sim: dict, actual: dict = K9_ACTUAL) -> str:
         ("Profit Days %", "profit_day_pct", "%"),
     ]
 
-    lines.append(f"\n  {'Metric':<20} {'K9 Actual':>12} {'Simulated':>12} "
+    lines.append(f"\n  {'Metric':<20} {'PolyM Actual':>12} {'Simulated':>12} "
                  f"{'Delta':>10} {'Match':>8}")
     lines.append("  " + "─" * 66)
 
@@ -287,7 +287,7 @@ def compare_metrics(sim: dict, actual: dict = K9_ACTUAL) -> str:
                  f"({total_score:.1f}/{max_score} metrics matched)")
 
     if accuracy >= 80:
-        lines.append("  🎯 EXCELLENT — Bot parameters closely match K9!")
+        lines.append("  🎯 EXCELLENT — Bot parameters closely match PolyM!")
     elif accuracy >= 60:
         lines.append("  ⚠️ GOOD — Some parameters need adjustment")
     else:
@@ -312,7 +312,7 @@ def compare_metrics(sim: dict, actual: dict = K9_ACTUAL) -> str:
 
 def auto_calibrate(positions: list, iterations: int = 20) -> StrategyParams:
     """
-    Automatically tune parameters to minimize delta with K9 actuals.
+    Automatically tune parameters to minimize delta with PolyM actuals.
     Uses grid search over key parameters INCLUDING slippage.
     EV/Trade is heavily weighted to close the -33% gap.
     """
@@ -379,7 +379,7 @@ def auto_calibrate(positions: list, iterations: int = 20) -> StrategyParams:
 
 
 def _score_metrics(sim: dict) -> float:
-    """Score how close simulated metrics are to K9 actuals (0-100).
+    """Score how close simulated metrics are to PolyM actuals (0-100).
     EV/Trade is now weighted 4x (highest priority)."""
     comparisons = [
         ("win_rate", 2.0),           # Important
@@ -398,7 +398,7 @@ def _score_metrics(sim: dict) -> float:
     score = 0
 
     for key, weight in comparisons:
-        actual = K9_ACTUAL.get(key, 0)
+        actual = PolyM_ACTUAL.get(key, 0)
         simulated = sim.get(key, 0)
 
         if actual != 0:
@@ -426,11 +426,11 @@ if __name__ == "__main__":
     # Use the FULL 104K CSV for ground truth
     CSV_FILE = os.path.join(
         PROJECT_ROOT,
-        "wallet_data/k9_analysis/full_positions_pnl_safe.csv"
+        "wallet_data/PolyM_analysis/full_positions_pnl_safe.csv"
     )
 
     print("=" * 72)
-    print("  K9 STRATEGY BACKTESTER")
+    print("  PolyM STRATEGY BACKTESTER")
     print("  Testing against 104K real positions")
     print("=" * 72)
 
@@ -451,7 +451,7 @@ if __name__ == "__main__":
             })
     print(f"   Loaded {len(positions):,} positions")
 
-    # Recalculate K9 benchmarks from THIS dataset (fair comparison)
+    # Recalculate PolyM benchmarks from THIS dataset (fair comparison)
     valid = [p for p in positions if p["total_bought_usd"] > 10]
     winners = [p for p in valid if p["realized_pnl"] > 0]
     losers = [p for p in valid if p["realized_pnl"] < 0]
@@ -459,38 +459,38 @@ if __name__ == "__main__":
     win_pnls = [p["realized_pnl"] for p in winners]
     loss_pnls = [abs(p["realized_pnl"]) for p in losers]
     
-    K9_ACTUAL["win_rate"] = len(winners) / (len(winners) + len(losers)) * 100
-    K9_ACTUAL["avg_win_pnl"] = statistics.mean(win_pnls)
-    K9_ACTUAL["avg_loss_pnl"] = statistics.mean(loss_pnls)
-    K9_ACTUAL["median_win_pnl"] = statistics.median(win_pnls)
-    K9_ACTUAL["median_loss_pnl"] = statistics.median(loss_pnls)
-    K9_ACTUAL["rr_ratio_mean"] = K9_ACTUAL["avg_win_pnl"] / K9_ACTUAL["avg_loss_pnl"]
-    K9_ACTUAL["rr_ratio_median"] = K9_ACTUAL["median_win_pnl"] / K9_ACTUAL["median_loss_pnl"]
-    K9_ACTUAL["ev_per_trade"] = (
-        K9_ACTUAL["win_rate"]/100 * K9_ACTUAL["avg_win_pnl"] -
-        (100 - K9_ACTUAL["win_rate"])/100 * K9_ACTUAL["avg_loss_pnl"]
+    PolyM_ACTUAL["win_rate"] = len(winners) / (len(winners) + len(losers)) * 100
+    PolyM_ACTUAL["avg_win_pnl"] = statistics.mean(win_pnls)
+    PolyM_ACTUAL["avg_loss_pnl"] = statistics.mean(loss_pnls)
+    PolyM_ACTUAL["median_win_pnl"] = statistics.median(win_pnls)
+    PolyM_ACTUAL["median_loss_pnl"] = statistics.median(loss_pnls)
+    PolyM_ACTUAL["rr_ratio_mean"] = PolyM_ACTUAL["avg_win_pnl"] / PolyM_ACTUAL["avg_loss_pnl"]
+    PolyM_ACTUAL["rr_ratio_median"] = PolyM_ACTUAL["median_win_pnl"] / PolyM_ACTUAL["median_loss_pnl"]
+    PolyM_ACTUAL["ev_per_trade"] = (
+        PolyM_ACTUAL["win_rate"]/100 * PolyM_ACTUAL["avg_win_pnl"] -
+        (100 - PolyM_ACTUAL["win_rate"])/100 * PolyM_ACTUAL["avg_loss_pnl"]
     )
     
     tp_prices = [p["avg_sell_price"] for p in winners if p["avg_sell_price"] > 0]
     sl_prices = [p["avg_sell_price"] for p in losers if p["sells"] > 0 and p["avg_sell_price"] > 0]
-    K9_ACTUAL["avg_tp_price"] = statistics.mean(tp_prices) if tp_prices else 0.528
-    K9_ACTUAL["avg_sl_price"] = statistics.mean(sl_prices) if sl_prices else 0.425
-    K9_ACTUAL["avg_entry"] = statistics.mean([p["avg_buy_price"] for p in valid if p["avg_buy_price"] > 0])
+    PolyM_ACTUAL["avg_tp_price"] = statistics.mean(tp_prices) if tp_prices else 0.528
+    PolyM_ACTUAL["avg_sl_price"] = statistics.mean(sl_prices) if sl_prices else 0.425
+    PolyM_ACTUAL["avg_entry"] = statistics.mean([p["avg_buy_price"] for p in valid if p["avg_buy_price"] > 0])
     
     # Daily PnL
     daily = defaultdict(float)
     for p in valid:
         daily[p["first_trade"][:10]] += p["realized_pnl"]
     profit_d = sum(1 for v in daily.values() if v > 0)
-    K9_ACTUAL["profit_day_pct"] = profit_d / len(daily) * 100 if daily else 0
+    PolyM_ACTUAL["profit_day_pct"] = profit_d / len(daily) * 100 if daily else 0
 
-    print(f"\n📊 K9 Actual Benchmarks (recalculated from data):")
-    print(f"   Win Rate:     {K9_ACTUAL['win_rate']:.1f}%")
-    print(f"   R:R Mean:     {K9_ACTUAL['rr_ratio_mean']:.2f}")
-    print(f"   Avg Win:      ${K9_ACTUAL['avg_win_pnl']:.2f}")
-    print(f"   Avg Loss:     ${K9_ACTUAL['avg_loss_pnl']:.2f}")
-    print(f"   EV/trade:     ${K9_ACTUAL['ev_per_trade']:.2f}")
-    print(f"   Profit days:  {K9_ACTUAL['profit_day_pct']:.1f}%")
+    print(f"\n📊 PolyM Actual Benchmarks (recalculated from data):")
+    print(f"   Win Rate:     {PolyM_ACTUAL['win_rate']:.1f}%")
+    print(f"   R:R Mean:     {PolyM_ACTUAL['rr_ratio_mean']:.2f}")
+    print(f"   Avg Win:      ${PolyM_ACTUAL['avg_win_pnl']:.2f}")
+    print(f"   Avg Loss:     ${PolyM_ACTUAL['avg_loss_pnl']:.2f}")
+    print(f"   EV/trade:     ${PolyM_ACTUAL['ev_per_trade']:.2f}")
+    print(f"   Profit days:  {PolyM_ACTUAL['profit_day_pct']:.1f}%")
 
     # ── Run 1: Default parameters ──
     print("\n" + "─" * 72)

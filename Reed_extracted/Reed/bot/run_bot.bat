@@ -1,7 +1,7 @@
 @echo off
-title K9 Polymarket Paper Trading Bot
+title PolyM Polymarket Paper Trading Bot
 echo =======================================================
-echo   K9 PAPER TRADING BOT - STARTUP SCRIPT
+echo   PolyM PAPER TRADING BOT - STARTUP SCRIPT
 echo =======================================================
 echo.
 
@@ -33,7 +33,7 @@ IF NOT EXIST ".venv" (
 )
 
 echo.
-echo [INFO] Starting K9 Bot...
+echo [INFO] Starting PolyM Bot...
 echo [INFO] Press Ctrl+C to stop the bot cleanly.
 echo.
 

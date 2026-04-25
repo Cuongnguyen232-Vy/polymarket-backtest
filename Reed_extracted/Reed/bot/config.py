@@ -217,3 +217,26 @@ WS_MARKET_URL = "wss://ws-subscriptions-clob.polymarket.com/ws/market"
 # ─────────────────────────────────────────────────────────────
 PREVENT_ZERO_REDEEM = True
 MAX_RETRY_ON_FAILURE = 3
+
+# --- 2m Strict Strategy Params ---
+TIMING_MODULO = 10
+ADX_PERIOD = 14
+ADX_THRESHOLD = 20
+EMA_FAST_PERIOD = 30
+EMA_SLOW_PERIOD = 60
+VOLUME_VECTOR_MULTIPLIER = 1.5
+MIN_BODY_PCT = 0.5
+RSI_PERIOD = 14
+
+# --- 2m Strict Strategy Params ---
+VOLUME_SURGE_MULTIPLIER = 1.5
+VOLUME_LOOKBACK = 5
+EMA_30M_PERIOD = 30
+EMA_1H_PERIOD = 60
+NY_SESSION_START_UTC = 13
+NY_SESSION_END_UTC = 21
+
+BINANCE_BASE_URL = 'https://api.binance.com/api/v3'
+SYMBOL = 'BTCUSDT'
+DATA_CACHE_DIR = 'cache'
+BACKTEST_MONTHS = 1

@@ -24,6 +24,10 @@ from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass
 from typing import Optional
 
+import time
+from strategy import Strategy2mStrict, Signal as BtcSignal
+from data_fetcher import fetch_klines, aggregate_1m_to_2m
+
 from config import (
     ENTRY_PRICE_MIN, ENTRY_PRICE_MAX, ENTRY_PRICE_IDEAL,
     TP_SPREAD, SL_SPREAD, MIN_ORDERBOOK_DEPTH,
@@ -96,40 +100,51 @@ class StrategyEngine:
             logger.debug(f"Skip {market.asset}: max positions reached ({open_count}/{MAX_CONCURRENT_POSITIONS})")
             return None
 
-        # ── Gate 3: Decide side (Report §4.1 — Market Maker) ──
-        side, entry_price, depth = self._decide_side(
-            market, orderbook_yes, orderbook_no
-        )
-        if side is None:
-            self.db.log("INFO", "strategy", f"SKIP {market.asset}: no valid side (empty orderbook)", {
-                "market_id": market.id, "question": market.question[:60]
-            })
+        # ── Gate 3: Evaluate 2m Strict Strategy ──
+        if market.asset != "BTC":
             return None
 
-        # ── Gate 4: Price in K9 zone? (Report §2.1) ──
-        if not (ENTRY_PRICE_MIN <= entry_price <= ENTRY_PRICE_MAX):
-            self.db.log("INFO", "strategy", f"SKIP {market.asset}: price out of zone", {
-                "entry_price": round(entry_price, 4),
-                "zone": f"{ENTRY_PRICE_MIN}-{ENTRY_PRICE_MAX}",
-                "side": side,
-            })
+        try:
+            now_ms = int(time.time() * 1000)
+            # Fetch recent candles
+            start_recent = now_ms - (300 * 60 * 1000) # last ~5 hours
+            start_30m = now_ms - (100 * 30 * 60 * 1000) # last 100 30m candles
+            start_1h = now_ms - (100 * 60 * 60 * 1000) # last 100 1h candles
+
+            candles_1m = fetch_klines("BTCUSDT", "1m", start_recent, now_ms, "1m")
+            candles_2m = aggregate_1m_to_2m(candles_1m)
+            candles_30m = fetch_klines("BTCUSDT", "30m", start_30m, now_ms, "30m")
+            candles_1h = fetch_klines("BTCUSDT", "1h", start_1h, now_ms, "1h")
+            
+            btc_strategy = Strategy2mStrict(candles_30m, candles_1h)
+            btc_signal = btc_strategy.evaluate(candles_2m, len(candles_2m) - 1)
+        except Exception as e:
+            logger.error(f"Error fetching Binance data: {e}")
             return None
 
-        # ── Gate 5: Depth sufficient? (Report §4.3 fix) ──
-        if depth < MIN_ORDERBOOK_DEPTH:
-            logger.debug(
-                f"Skipped {market.asset}: depth ${depth:,.0f} "
-                f"< ${MIN_ORDERBOOK_DEPTH:,}"
-            )
-            self.db.log("INFO", "strategy", f"SKIP {market.asset}: insufficient depth", {
-                "depth": round(depth, 0), "min_required": MIN_ORDERBOOK_DEPTH, "side": side
-            })
+        if btc_signal is None:
             return None
+
+        side = "YES" if btc_signal.signal_type == "LONG" else "NO"
+        
+        # Determine entry price from orderbook (buy at ask)
+        if side == "YES":
+            entry_price = orderbook_yes.get("best_ask", market.yes_price)
+            depth = orderbook_yes.get("total_ask_depth", 0)
+        else:
+            entry_price = orderbook_no.get("best_ask", market.no_price)
+            depth = orderbook_no.get("total_ask_depth", 0)
+
+        if entry_price <= 0 or entry_price > 0.95:
+            # Fallback for paper trading if no orderbook or too expensive
+            entry_price = 0.80
+
+        entry_price = round(entry_price, 4)
 
         # ── Calculate trade parameters ──
-        tp_price = self._calculate_tp(entry_price, side)
-        sl_price = self._calculate_sl(entry_price, side)
-        size_usd = self._calculate_size(depth, balance)
+        tp_price = 0.99  # 2m Strict TP is almost 1.00
+        sl_price = 0.01  # 2m Strict SL is basically 0 (hold to expiry)
+        size_usd = 100.0 # Fixed size or could use self._calculate_size(depth, balance)
         shares = size_usd / entry_price if entry_price > 0 else 0
 
         if size_usd < SIZE_MIN:

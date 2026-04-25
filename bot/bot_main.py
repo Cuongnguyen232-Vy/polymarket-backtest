@@ -1,5 +1,5 @@
 """
-bot_main.py — K9 Paper Trading Bot Orchestrator
+bot_main.py — PolyM Paper Trading Bot Orchestrator
 ═══════════════════════════════════════════════════════════════
 Main entry point. Runs all modules concurrently:
 
@@ -45,15 +45,15 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler("k9_bot.log", encoding="utf-8"),
+        logging.FileHandler("PolyM_bot.log", encoding="utf-8"),
     ]
 )
-logger = logging.getLogger("k9.main")
+logger = logging.getLogger("PolyM.main")
 
 
-class K9Bot:
+class PolyMBot:
     """
-    K9 Paper Trading Bot — Main Orchestrator.
+    PolyM Paper Trading Bot — Main Orchestrator.
     
     Coordinates all modules in an async event loop:
     - scan_loop: Find new eligible markets (REST, 1/min)
@@ -88,7 +88,7 @@ class K9Bot:
         self._subscribed_tokens: set[str] = set()
 
         logger.info("=" * 60)
-        logger.info("  K9 PAPER TRADING BOT — INITIALIZED")
+        logger.info("  PolyM PAPER TRADING BOT — INITIALIZED")
         logger.info(f"  Balance: ${self.executor.balance:,.2f}")
         logger.info(f"  Target: {TARGET_TRADES_PER_DAY} trades/day")
         logger.info(f"  Max positions: {MAX_CONCURRENT_POSITIONS}")
@@ -161,7 +161,7 @@ class K9Bot:
         REST API only, once per minute (avoids rate limits).
         
         Daily capacity gate: stops entering new trades once
-        the day's target trade count is reached (matching K9's
+        the day's target trade count is reached (matching PolyM's
         daily return percentage on the equity curve).
         """
         while self._running:
@@ -384,7 +384,7 @@ def main():
             print("Cancelled.")
             return
 
-    bot = K9Bot(reset=reset)
+    bot = PolyMBot(reset=reset)
 
     # Handle Ctrl+C gracefully
     loop = asyncio.new_event_loop()

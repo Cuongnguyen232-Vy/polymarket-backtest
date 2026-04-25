@@ -1,5 +1,5 @@
 /**
- * app.js — K9 Dashboard Frontend Logic
+ * app.js — PolyM Dashboard Frontend Logic
  * ═══════════════════════════════════════════
  * Fetches data from Flask API and renders:
  *   - Profile stats
@@ -520,18 +520,18 @@ async function fetchBenchmark() {
     if (!data) return;
 
     const bot = data.bot || {};
-    const k9 = data.k9_benchmark || {};
+    const PolyM = data.PolyM_benchmark || {};
 
     setText("m-winrate", `${bot.win_rate || 0}%`);
     setText("m-rr", `${bot.rr_ratio || 0}`);
     setText("m-profitdays", `${bot.profit_days_pct || 0}%`);
-    setText("m-accuracy", `${k9.accuracy_match || 91}%`);
+    setText("m-accuracy", `${PolyM.accuracy_match || 91}%`);
 
     // Animate bars
     animateBar("bar-winrate", Math.min((bot.win_rate || 0) / 100 * 100, 100));
     animateBar("bar-rr", Math.min((bot.rr_ratio || 0) / 2 * 100, 100));
     animateBar("bar-profitdays", Math.min((bot.profit_days_pct || 0), 100));
-    animateBar("bar-accuracy", k9.accuracy_match || 91);
+    animateBar("bar-accuracy", PolyM.accuracy_match || 91);
 }
 
 // ─── Utilities ──────────────────────────────────────────────

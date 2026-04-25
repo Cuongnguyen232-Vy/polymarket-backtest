@@ -5,13 +5,13 @@
 /* ─── CSS Variables (Design Tokens) ─── */
 :root {
     /* Background */
-    --bg-primary: #0d1117;
-    --bg-secondary: #161b22;
-    --bg-tertiary: #1c2128;
-    --bg-card: #161b22;
+    --bg-primary: #0a0e17;
+    --bg-secondary: #101623;
+    --bg-tertiary: #172033;
+    --bg-card: #101623;
     --bg-hover: #1f2937;
-    --bg-input: #0d1117;
-    --bg-nav: #0d1117ee;
+    --bg-input: #0a0e17;
+    --bg-nav: #0a0e17ee;
 
     /* Text */
     --text-primary: #f0f6fc;
@@ -25,10 +25,10 @@
     --green-glow: #00d26a33;
     --red: #ff4757;
     --red-dim: #ff475722;
-    --blue: #2563eb;
-    --blue-bright: #3b82f6;
-    --blue-dim: #2563eb22;
-    --purple: #8b5cf6;
+    --blue: #2A59FA;
+    --blue-bright: #436cfb;
+    --blue-dim: #2a59fa22;
+    --purple: #00c2ff;
     --cyan: #06b6d4;
     --amber: #f59e0b;
 

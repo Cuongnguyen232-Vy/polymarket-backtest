@@ -1,0 +1,31 @@
+Backtest this strategy using high quality Polygon.io or binance data: Here is the clean, ready-to-copy strategy brief for your developer:Strategy Brief for Developers – 2m Strict StrategyStrategy Name:
+2m Strict – First 2m of Every 5m Bar + Dual EMA FilterTarget Market:
+Polymarket BTC 5-minute Up/Down binary marketsChart Timeframe:
+Must be run on the 2-minute chartExact Trigger Rules (ALL conditions must be true at once)Timing Rule (Most Important)
+The 2m candle must be the first 2m candle of a new 5m bar.
+It must close within the first 2 minutes of the 5m window (i.e. candles closing at approximately :02, :07, :12, :17, :22, :27, etc.).
+Volume Vector Rule
+Current 2m candle volume ≥ 200% of the average volume of the previous 10 candles.
+Full-Bodied Filter
+Candle body must be at least 0.08% of the close price (no dojis).
+Direction Green candle (close > open) = LONG / UP signal
+Red candle (close < open) = SHORT / DOWN signal
+
+
+
+EMA Trend Filter (Required) LONG only if price is above both:30-minute 20 EMA
+1-hour 50 EMA
+
+
+
+SHORT only if price is below both EMAs.
+
+
+
+Signal:
+The direction of this early 2m vector predicts how the full 5m candle will close.Backtest Requirements
+Please backtest this strategy over the last 12 months using high-quality data (Polygon.io preferred).Report the following:Overall win rate
+Win rate for LONG vs SHORT signals separately
+Average number of setups per week (24/7 and NY session only)
+Max drawdown
+Sensitivity to fill price (test at 80¢, 82¢, 85¢)

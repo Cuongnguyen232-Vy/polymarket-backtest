@@ -1,0 +1,11 @@
+.env
+*.log
+*.pid
+*.csv
+*.pdf
+__pycache__/
+.DS_Store
+.venv/
+venv/
+reports/
+wallet_data/

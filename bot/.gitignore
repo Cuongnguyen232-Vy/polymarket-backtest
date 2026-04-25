@@ -1,0 +1,12 @@
+# K9 Bot - Ignore files
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+*.log
+bot.pid
+out.txt
+.env
+reports/
+live_run.log
+k9_bot.log
